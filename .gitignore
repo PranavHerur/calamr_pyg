@@ -1,0 +1,40 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+
+# Virtual environments
+.venv
+venv/
+env/
+
+# ignore macOS hidden files
+.DS_Store
+*/.DS_Store
+
+# Project-specific
+results/
+*.pt
+*.pth
+*.ckpt
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+notebooks/*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude
+.claude/
+
+# Results
+results/
+notebooks/
