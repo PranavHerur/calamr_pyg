@@ -35,16 +35,6 @@ uv pip install -e .
 uv pip install -e ".[dev]"
 ```
 
-### Using pip
-
-```bash
-# Install in development mode
-pip install -e .
-
-# With development dependencies
-pip install -e ".[dev]"
-```
-
 ## Usage
 
 ### Training

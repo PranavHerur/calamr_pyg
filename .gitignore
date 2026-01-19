@@ -34,7 +34,11 @@ notebooks/*.ipynb
 
 # Claude
 .claude/
+CLAUDE.md
 
 # Results
 results/
 notebooks/
+
+# Docs
+docs/

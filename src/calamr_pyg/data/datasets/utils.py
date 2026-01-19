@@ -6,6 +6,9 @@ import torch
 from torch.utils.data import Dataset, Subset
 from torch_geometric.data import Data
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def split_dataset_random(
     dataset: Union[Dataset[Data], Sequence[Data]],
@@ -74,7 +77,7 @@ def load_dataset(path: Union[str, Path]) -> List[Data]:
     # Load all data files
     all_data = []
     for file in data_files:
-        print(f"Loading {file.name}...")
+        logger.debug(f"Loading {file.name}...")
         data = torch.load(file, weights_only=False)
 
         # Handle different formats
@@ -85,5 +88,5 @@ def load_dataset(path: Union[str, Path]) -> List[Data]:
         else:
             raise ValueError(f"Unexpected data type in {file}: {type(data)}")
 
-    print(f"Loaded {len(all_data)} graphs from {len(data_files)} file(s)")
+    logger.info(f"Loaded {len(all_data)} graphs from {len(data_files)} file(s)")
     return all_data

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Hybrid GCN + Attention Pooling for medical hallucination detection.
-Combines working GCN layers with attention-based graph pooling.
+GPS (General, Powerful, Scalable) Graph Transformer training.
+State-of-the-art architecture combining local MPNN with global attention.
 """
 
 import argparse
 
-from calamr_pyg.models import HybridGCN
+from calamr_pyg.models.gps import GPS
 from calamr_pyg.data.datasets import load_and_split_dataset
 from calamr_pyg.training import train_model
 
@@ -14,48 +14,21 @@ from calamr_pyg.training import train_model
 def exec(
     dataset_path: str,
     hidden_dim: int = 256,
-    num_layers: int = 3,
+    num_layers: int = 4,
     dropout: float = 0.2,
-    pooling: str = "attention",
-    multi_head: bool = False,
+    pooling: str = "mean",
     num_heads: int = 4,
-    attention_activation: str = "tanh",
-    lr: float = 0.001,
+    lr: float = 0.0005,
     weight_decay: float = 1e-5,
     epochs: int = 50,
     batch_size: int = 32,
     patience: int = 5,
     min_delta: float = 0.001,
     seed: int = 42,
-    output_dir: str = "results/hybrid",
+    output_dir: str = "results/gps",
     verbose: bool = True,
 ) -> dict:
-    """
-    Train and evaluate HybridGCN model.
-
-    Args:
-        dataset_path: Path to dataset directory containing .pt files
-        hidden_dim: Hidden layer dimension
-        num_layers: Number of GCN layers
-        dropout: Dropout rate
-        pooling: Pooling method ('attention', 'mean', 'max')
-        multi_head: Use multi-head attention pooling
-        num_heads: Number of attention heads
-        attention_activation: Activation for attention ('tanh', 'relu')
-        lr: Learning rate
-        weight_decay: Weight decay for optimizer
-        epochs: Maximum number of training epochs
-        batch_size: Batch size for training
-        patience: Early stopping patience
-        min_delta: Minimum improvement to reset patience
-        seed: Random seed
-        output_dir: Directory to save results
-        verbose: Print progress during training
-
-    Returns:
-        Dictionary containing model config, training config, and results
-    """
-    # Load data
+    """Train and evaluate GPS model."""
     train_data, val_data, test_data = load_and_split_dataset(
         dataset_path,
         train_ratio=0.7,
@@ -66,25 +39,22 @@ def exec(
 
     input_dim = train_data[0].x.size(1)
 
-    # Create model
-    model = HybridGCN(
+    model = GPS(
         input_dim=input_dim,
         hidden_dim=hidden_dim,
         num_layers=num_layers,
+        edge_dim=4,
+        num_heads=num_heads,
         dropout=dropout,
         pooling=pooling,
-        use_multi_head_attention=multi_head,
-        num_attention_heads=num_heads,
-        attention_activation=attention_activation,
     )
 
-    # Train
     results = train_model(
         model,
         train_data,
         val_data,
         test_data,
-        model_name="HybridGCN",
+        model_name="GPS",
         lr=lr,
         weight_decay=weight_decay,
         epochs=epochs,
@@ -96,16 +66,14 @@ def exec(
         verbose=verbose,
     )
 
-    # Add model config to results
     results["model_config"] = {
         "input_dim": input_dim,
         "hidden_dim": hidden_dim,
         "num_layers": num_layers,
+        "edge_dim": 4,
+        "num_heads": num_heads,
         "dropout": dropout,
         "pooling": pooling,
-        "multi_head": multi_head,
-        "num_heads": num_heads,
-        "attention_activation": attention_activation,
     }
     results["dataset"]["path"] = dataset_path
 
@@ -113,23 +81,21 @@ def exec(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Hybrid GCN + Attention Pooling")
+    parser = argparse.ArgumentParser(description="GPS Graph Transformer")
     parser.add_argument("--dataset_path", type=str, required=True)
     parser.add_argument("--hidden_dim", type=int, default=256)
-    parser.add_argument("--num_layers", type=int, default=3)
+    parser.add_argument("--num_layers", type=int, default=4)
     parser.add_argument("--dropout", type=float, default=0.2)
-    parser.add_argument("--pooling", default="attention", choices=["attention", "mean", "max"])
-    parser.add_argument("--multi_head", action="store_true")
+    parser.add_argument("--pooling", default="mean", choices=["mean", "add", "both"])
     parser.add_argument("--num_heads", type=int, default=4)
-    parser.add_argument("--attention_activation", default="tanh", choices=["tanh", "relu"])
-    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--lr", type=float, default=0.0005)
     parser.add_argument("--weight_decay", type=float, default=1e-5)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--patience", type=int, default=5)
     parser.add_argument("--min_delta", type=float, default=0.001)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--output_dir", type=str, default="results/hybrid")
+    parser.add_argument("--output_dir", type=str, default="results/gps")
     args = parser.parse_args()
 
     exec(
@@ -138,9 +104,7 @@ if __name__ == "__main__":
         num_layers=args.num_layers,
         dropout=args.dropout,
         pooling=args.pooling,
-        multi_head=args.multi_head,
         num_heads=args.num_heads,
-        attention_activation=args.attention_activation,
         lr=args.lr,
         weight_decay=args.weight_decay,
         epochs=args.epochs,
