@@ -197,7 +197,7 @@ def run_experiments(
                 print(f"\n{model_name} completed:")
                 print(f"  Accuracy: {metrics['accuracy']:.4f}")
                 print(f"  F1 Score: {metrics['f1']:.4f}")
-                print(f"  AUC-ROC:  {metrics['auc_roc']:.4f}")
+                print(f"  AUC:      {metrics['auc']:.4f}")
 
         except Exception as e:
             if verbose:
@@ -263,8 +263,7 @@ def generate_analytics(results: dict, verbose: bool = True) -> dict:
             "precision": val_metrics["precision"],
             "recall": val_metrics["recall"],
             "f1": val_metrics["f1"],
-            "auc_roc": val_metrics["auc_roc"],
-            "auc_pr": val_metrics["auc_pr"],
+            "auc": val_metrics["auc"],
             # Youden metrics (secondary)
             "youden_f1": youden_metrics["f1"],
             "youden_accuracy": youden_metrics["accuracy"],
@@ -275,7 +274,7 @@ def generate_analytics(results: dict, verbose: bool = True) -> dict:
 
     # Find best models per metric
     best_models = {}
-    for metric in ["accuracy", "f1", "auc_roc", "auc_pr", "precision", "recall"]:
+    for metric in ["accuracy", "f1", "auc", "precision", "recall"]:
         best_key = max(metrics_comparison.keys(), key=lambda k: metrics_comparison[k][metric])
         best_models[metric] = {
             "model": metrics_comparison[best_key]["model_name"],
@@ -284,7 +283,7 @@ def generate_analytics(results: dict, verbose: bool = True) -> dict:
 
     # Compute average metrics
     avg_metrics = {}
-    for metric in ["accuracy", "f1", "auc_roc", "auc_pr"]:
+    for metric in ["accuracy", "f1", "auc"]:
         values = [m[metric] for m in metrics_comparison.values()]
         avg_metrics[metric] = sum(values) / len(values)
 
@@ -308,7 +307,7 @@ def compute_rankings(metrics_comparison: dict) -> dict:
     """Compute model rankings for each metric."""
     rankings = {}
 
-    for metric in ["accuracy", "f1", "auc_roc", "auc_pr", "training_time", "num_params"]:
+    for metric in ["accuracy", "f1", "auc", "training_time", "num_params"]:
         # For time and params, lower is better
         reverse = metric not in ["training_time", "num_params"]
         sorted_models = sorted(
@@ -333,9 +332,9 @@ def print_analytics(analytics: dict):
     print(f"\nRuns: {analytics['successful_runs']}/{analytics['total_models_run']} successful")
 
     # Print comparison table
-    print("\n" + "-" * 90)
-    print(f"{'Model':<20} {'Acc':>8} {'F1':>8} {'AUC-ROC':>8} {'AUC-PR':>8} {'ValLoss':>8} {'Params':>10} {'Time(s)':>8}")
-    print("-" * 90)
+    print("\n" + "-" * 80)
+    print(f"{'Model':<20} {'Acc':>8} {'F1':>8} {'AUC':>8} {'ValLoss':>8} {'Params':>10} {'Time(s)':>8}")
+    print("-" * 80)
 
     for model_key, m in sorted(
         analytics["metrics_comparison"].items(),
@@ -346,14 +345,13 @@ def print_analytics(analytics: dict):
             f"{m['model_name']:<20} "
             f"{m['accuracy']:>8.4f} "
             f"{m['f1']:>8.4f} "
-            f"{m['auc_roc']:>8.4f} "
-            f"{m['auc_pr']:>8.4f} "
+            f"{m['auc']:>8.4f} "
             f"{m['best_val_loss']:>8.4f} "
             f"{m['num_params']:>10,} "
             f"{m['training_time']:>8.1f}"
         )
 
-    print("-" * 90)
+    print("-" * 80)
 
     # Print best models
     print("\nBest Models:")
@@ -377,9 +375,9 @@ def format_analytics_report(analytics: dict, results: dict) -> str:
     lines.append("")
 
     # Comparison table
-    lines.append("-" * 90)
-    lines.append(f"{'Model':<20} {'Acc':>8} {'F1':>8} {'AUC-ROC':>8} {'AUC-PR':>8} {'ValLoss':>8} {'Params':>10} {'Time(s)':>8}")
-    lines.append("-" * 90)
+    lines.append("-" * 80)
+    lines.append(f"{'Model':<20} {'Acc':>8} {'F1':>8} {'AUC':>8} {'ValLoss':>8} {'Params':>10} {'Time(s)':>8}")
+    lines.append("-" * 80)
 
     for model_key, m in sorted(
         analytics["metrics_comparison"].items(),
@@ -390,14 +388,13 @@ def format_analytics_report(analytics: dict, results: dict) -> str:
             f"{m['model_name']:<20} "
             f"{m['accuracy']:>8.4f} "
             f"{m['f1']:>8.4f} "
-            f"{m['auc_roc']:>8.4f} "
-            f"{m['auc_pr']:>8.4f} "
+            f"{m['auc']:>8.4f} "
             f"{m['best_val_loss']:>8.4f} "
             f"{m['num_params']:>10,} "
             f"{m['training_time']:>8.1f}"
         )
 
-    lines.append("-" * 90)
+    lines.append("-" * 80)
     lines.append("")
 
     # Best models
@@ -412,8 +409,8 @@ def format_analytics_report(analytics: dict, results: dict) -> str:
         lines.append(f"  {item['rank']}. {item['model']:<20} ({item['value']:.4f})")
     lines.append("")
 
-    lines.append("RANKINGS BY AUC-ROC:")
-    for item in analytics["rankings"]["auc_roc"]:
+    lines.append("RANKINGS BY AUC:")
+    for item in analytics["rankings"]["auc"]:
         lines.append(f"  {item['rank']}. {item['model']:<20} ({item['value']:.4f})")
     lines.append("")
 
