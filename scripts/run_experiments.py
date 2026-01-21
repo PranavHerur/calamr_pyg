@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Run all GNN model experiments sequentially and generate analytics.
-Compares performance across models: HybridGCN, EdgeAwareGAT, GraphSAGE, GIN, GatedGNN, GraphTransformer, GPS.
+Compares performance across models: HybridGCN, EdgeAwareGAT, GraphSAGE, GIN, GatedGNN,
+GraphTransformer, GPS, PNA, GATv2, APPNP, GCN2, DeeperGCN, GraphSAINT.
 """
 
 import argparse
@@ -19,6 +20,11 @@ from train_gated import exec as train_gated
 from train_graph_transformer import exec as train_graph_transformer
 from train_gps import exec as train_gps
 from train_pna import exec as train_pna
+from train_gatv2 import exec as train_gatv2
+from train_appnp import exec as train_appnp
+from train_gcn2 import exec as train_gcn2
+from train_deeper_gcn import exec as train_deeper_gcn
+from train_graph_saint import exec as train_graph_saint
 
 
 # Model registry with default configurations
@@ -105,6 +111,62 @@ MODELS = {
             "num_layers": 3,
             "dropout": 0.2,
             "pooling": "both",
+        },
+    },
+    "gatv2": {
+        "name": "GATv2",
+        "train_fn": train_gatv2,
+        "defaults": {
+            "hidden_dim": 256,
+            "num_layers": 3,
+            "heads": 4,
+            "dropout": 0.2,
+            "pooling": "mean",
+        },
+    },
+    "appnp": {
+        "name": "APPNP",
+        "train_fn": train_appnp,
+        "defaults": {
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "K": 10,
+            "alpha": 0.1,
+            "dropout": 0.2,
+            "pooling": "mean",
+        },
+    },
+    "gcn2": {
+        "name": "GCN2",
+        "train_fn": train_gcn2,
+        "defaults": {
+            "hidden_dim": 256,
+            "num_layers": 8,
+            "alpha": 0.1,
+            "theta": 0.5,
+            "dropout": 0.2,
+            "pooling": "mean",
+        },
+    },
+    "deeper_gcn": {
+        "name": "DeeperGCN",
+        "train_fn": train_deeper_gcn,
+        "defaults": {
+            "hidden_dim": 256,
+            "num_layers": 7,
+            "dropout": 0.2,
+            "aggr": "softmax",
+            "pooling": "mean",
+        },
+    },
+    "graph_saint": {
+        "name": "GraphSAINT",
+        "train_fn": train_graph_saint,
+        "defaults": {
+            "hidden_dim": 256,
+            "num_layers": 3,
+            "dropout": 0.2,
+            "pooling": "mean",
         },
     },
 }
